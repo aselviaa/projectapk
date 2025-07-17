@@ -6,68 +6,28 @@ import streamlit as st
 
 # Database produk dan kadar gula per porsi (gram)
 produk_gula = {
-    "Teh Botol": 18.0,
-    "Coca Cola": 35.0,
-    "Oreo": 8.0,
-    "Aqua": 0.0,
-    "Fanta": 36.0,
-    "Good Day": 17.0,
-    "Indomilk": 12.0,
-    "Nutrisari": 20.0,
-    "Ultra Milk": 10.5,
-    "Sprite": 33.0,
-    "Milo": 12.0,
-    "Yakult": 10.0,
-    "Fruit Tea": 24.0,
-    "Pocari Sweat": 6.0,
-    "Susu Kental Manis": 21.0,
-    "Kratingdaeng": 27.0,
-    "Red Bull": 28.0,
-    "Floridina": 18.0,
-    "Pulpy Orange": 21.0,
-    "Minute Maid": 25.0,
-    "You C 1000": 15.0,
-    "Bear Brand": 7.0,
-    "Cap Panda": 20.0,
-    "Marimas": 22.0,
-    "Es Teh Manis": 20.0,
-    "Kopi Gula Aren": 19.0,
-    "Matcha Latte": 23.0,
-    "Pop Ice": 30.0,
-    "Coklat Dingin": 26.0,
-    "Chocolatos Drink": 14.0,
-    "Kapal Api Sachet": 8.0,
-    "ABC Susu": 12.0,
-    "Teh Kotak": 19.0,
-    "Mizone": 9.0,
-    "Buavita": 20.0,
-    "Nutriboost": 22.0,
-    "Green Tea Botol": 15.0,
-    "Jus Apel": 24.0,
-    "Jus Mangga": 28.0,
-    "Jus Jambu": 27.0,
-    "Rasa Anggur": 26.0,
-    "Le Minerale": 0.0,
-    "Soda Gembira": 40.0,
-    "Fruittea Blackcurrant": 25.0,
-    "Frozz Tea": 18.0,
-    "Kopiko 78": 22.0,
-    "Cimory Yogurt Drink": 10.0,
-    "Energen": 13.0,
-    "Dancow Sachet": 11.0,
-    "Susu Jahe Instan": 15.0,
-    "Cereal Drink": 14.0
+    "Teh Botol": 18.0, "Coca Cola": 35.0, "Oreo": 8.0, "Aqua": 0.0, "Fanta": 36.0,
+    "Good Day": 17.0, "Indomilk": 12.0, "Nutrisari": 20.0, "Ultra Milk": 10.5, "Sprite": 33.0,
+    "Milo": 12.0, "Yakult": 10.0, "Fruit Tea": 24.0, "Pocari Sweat": 6.0, "Susu Kental Manis": 21.0,
+    "Kratingdaeng": 27.0, "Red Bull": 28.0, "Floridina": 18.0, "Pulpy Orange": 21.0, "Minute Maid": 25.0,
+    "You C 1000": 15.0, "Bear Brand": 7.0, "Cap Panda": 20.0, "Marimas": 22.0, "Es Teh Manis": 20.0,
+    "Kopi Gula Aren": 19.0, "Matcha Latte": 23.0, "Pop Ice": 30.0, "Coklat Dingin": 26.0, "Chocolatos Drink": 14.0,
+    "Kapal Api Sachet": 8.0, "ABC Susu": 12.0, "Teh Kotak": 19.0, "Mizone": 9.0, "Buavita": 20.0,
+    "Nutriboost": 22.0, "Green Tea Botol": 15.0, "Jus Apel": 24.0, "Jus Mangga": 28.0, "Jus Jambu": 27.0,
+    "Rasa Anggur": 26.0, "Le Minerale": 0.0, "Soda Gembira": 40.0, "Fruittea Blackcurrant": 25.0,
+    "Frozz Tea": 18.0, "Kopiko 78": 22.0, "Cimory Yogurt Drink": 10.0, "Energen": 13.0,
+    "Dancow Sachet": 11.0, "Susu Jahe Instan": 15.0, "Cereal Drink": 14.0
 }
 
 # ===========================
-# SESSION STATE INISIALISASI
+# INISIALISASI SESSION STATE
 # ===========================
 
 if "riwayat" not in st.session_state:
     st.session_state.riwayat = []
 
 if "batas_gula" not in st.session_state:
-    st.session_state.batas_gula = 50  # default
+    st.session_state.batas_gula = 50
 
 # ===========================
 # HEADER APLIKASI
@@ -83,7 +43,7 @@ st.markdown(
 )
 
 # ===========================
-# SIDEBAR PENGATURAN
+# SIDEBAR: PENGATURAN
 # ===========================
 
 st.sidebar.header("⚙️ Pengaturan")
@@ -104,7 +64,6 @@ def hitung_batas_usia(usia):
 
 batas_default = hitung_batas_usia(usia)
 
-# Input batas (bisa diganti manual)
 batas = st.sidebar.number_input(
     "Batas maksimum konsumsi gula harian (gram)",
     min_value=1,
@@ -115,7 +74,7 @@ batas = st.sidebar.number_input(
 st.session_state.batas_gula = batas
 
 # ===========================
-# FORM INPUT KONSUMSI
+# FORM INPUT PRODUK
 # ===========================
 
 with st.form("form_produk"):
@@ -140,11 +99,26 @@ if st.session_state.riwayat:
     for i, (produk, jumlah, gula) in enumerate(st.session_state.riwayat, start=1):
         st.write(f"{i}. {jumlah} porsi {produk} = {gula:.1f} gram gula")
 
-    # Notifikasi batas konsumsi
-    if total_gula > st.session_state.batas_gula:
-        st.error(f"⚠️ Total konsumsi {total_gula:.1f} gram telah melebihi batas {st.session_state.batas_gula} gram!")
+    # Evaluasi dan Notifikasi
+    batas = st.session_state.batas_gula
+    st.write("---")
+    if total_gula > batas:
+        st.error(f"⚠️ Total konsumsi {total_gula:.1f} gram **telah melebihi batas** {batas} gram berdasarkan usia {usia} tahun.")
+        st.markdown("""
+        **🚫 Konsumsi gula Anda hari ini tidak sehat.**  
+        ❗ Terlalu banyak gula bisa meningkatkan risiko:  
+        - Obesitas  
+        - Diabetes tipe 2  
+        - Gangguan jantung  
+        
+        **💡 Saran:**  
+        - Kurangi konsumsi minuman manis.  
+        - Perbanyak air putih dan serat dari buah & sayur.  
+        - Coba gunakan gula rendah kalori untuk alternatif.
+        """)
     else:
-        st.info(f"💡 Total Gula Hari Ini: {total_gula:.1f} gram dari batas {st.session_state.batas_gula} gram berdasarkan usia {usia} tahun.")
+        st.success(f"✅ Total konsumsi {total_gula:.1f} gram masih **dalam batas aman** ({batas} gram).")
+        st.markdown("**👍 Konsumsi gula Anda hari ini tergolong baik!** Jaga terus pola makan sehat 💪.")
 
 # ===========================
 # RESET DATA
