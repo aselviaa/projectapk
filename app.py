@@ -1,6 +1,10 @@
 import streamlit as st
 
-# Database produk gula (gram per porsi)
+# =======================
+# GLUCOTRACK: SWEET TRACKER
+# =======================
+
+# Database produk dan kadar gula per porsi (gram)
 produk_gula = {
     "Teh Botol": 18.0,
     "Coca Cola": 35.0,
@@ -14,15 +18,40 @@ produk_gula = {
     "Sprite": 33.0
 }
 
-# Simpan daftar konsumsi sementara
+# Inisialisasi session_state
 if "riwayat" not in st.session_state:
     st.session_state.riwayat = []
 
-st.title("🍬 SweetTracker")
-st.subheader("Penghitung Kadar Gula Harian")
+if "batas_gula" not in st.session_state:
+    st.session_state.batas_gula = 50  # default 50 gram
 
-# Form input
+# =======================
+# TAMPILAN UTAMA
+# =======================
+
+# Header Aplikasi
+st.markdown(
+    """
+    <div style='text-align: center; padding: 10px 0'>
+        <h1 style='color: #4CAF50;'>🩸 GlucoTrack</h1>
+        <h4 style='color: gray;'>Aplikasi Pemantau Konsumsi Gula Harian</h4>
+    </div>
+    """, unsafe_allow_html=True
+)
+
+# Sidebar: pengaturan batas maksimum gula
+st.sidebar.header("⚙️ Pengaturan")
+batas = st.sidebar.number_input(
+    "Batas maksimum konsumsi gula harian (gram)",
+    min_value=1,
+    value=st.session_state.batas_gula,
+    step=1
+)
+st.session_state.batas_gula = batas
+
+# Form input konsumsi produk
 with st.form("form_produk"):
+    st.subheader("➕ Tambahkan Konsumsi Gula")
     produk = st.selectbox("Pilih Produk", list(produk_gula.keys()))
     jumlah = st.number_input("Jumlah Porsi", min_value=1, value=1)
     submitted = st.form_submit_button("Tambah")
@@ -30,18 +59,23 @@ with st.form("form_produk"):
     if submitted:
         total = produk_gula[produk] * jumlah
         st.session_state.riwayat.append((produk, jumlah, total))
-        st.success(f"{jumlah} porsi {produk} = {total} gram gula")
+        st.success(f"{jumlah} porsi {produk} = {total} gram gula ditambahkan.")
 
 # Tampilkan riwayat konsumsi
 if st.session_state.riwayat:
     st.subheader("📋 Riwayat Konsumsi Hari Ini")
-    total_gula = 0.0
+    total_gula = sum(item[2] for item in st.session_state.riwayat)
+
     for i, (produk, jumlah, gula) in enumerate(st.session_state.riwayat, start=1):
         st.write(f"{i}. {jumlah} porsi {produk} = {gula} gram gula")
-        total_gula += gula
-    st.info(f"💡 Total Gula Hari Ini: **{total_gula} gram**")
 
-# Reset tombol
+    # Notifikasi batas
+    if total_gula > st.session_state.batas_gula:
+        st.error(f"⚠️ Total konsumsi {total_gula:.1f} gram telah melebihi batas {st.session_state.batas_gula} gram!")
+    else:
+        st.info(f"💡 Total Gula Hari Ini: {total_gula:.1f} gram dari batas {st.session_state.batas_gula} gram.")
+
+# Tombol reset
 if st.button("🔄 Reset Data"):
     st.session_state.riwayat = []
     st.warning("Riwayat konsumsi telah dihapus.")
