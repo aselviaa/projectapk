@@ -1,8 +1,8 @@
 import streamlit as st
 
-# =======================
+# ===========================
 # GLUCOTRACK: SWEET TRACKER
-# =======================
+# ===========================
 
 # Database produk dan kadar gula per porsi (gram)
 produk_gula = {
@@ -59,19 +59,20 @@ produk_gula = {
     "Cereal Drink": 14.0
 }
 
+# ===========================
+# SESSION STATE INISIALISASI
+# ===========================
 
-# Inisialisasi session_state
 if "riwayat" not in st.session_state:
     st.session_state.riwayat = []
 
 if "batas_gula" not in st.session_state:
-    st.session_state.batas_gula = 50  # default 50 gram
+    st.session_state.batas_gula = 50  # default
 
-# =======================
-# TAMPILAN UTAMA
-# =======================
+# ===========================
+# HEADER APLIKASI
+# ===========================
 
-# Header Aplikasi
 st.markdown(
     """
     <div style='text-align: center; padding: 10px 0'>
@@ -81,43 +82,74 @@ st.markdown(
     """, unsafe_allow_html=True
 )
 
-# Sidebar: pengaturan batas maksimum gula
+# ===========================
+# SIDEBAR PENGATURAN
+# ===========================
+
 st.sidebar.header("⚙️ Pengaturan")
+
+usia = st.sidebar.number_input("Masukkan Usia Anda", min_value=1, max_value=120, value=25)
+
+def hitung_batas_usia(usia):
+    if usia <= 6:
+        return 19
+    elif usia <= 10:
+        return 24
+    elif usia <= 17:
+        return 30
+    elif usia <= 59:
+        return 50
+    else:
+        return 40
+
+batas_default = hitung_batas_usia(usia)
+
+# Input batas (bisa diganti manual)
 batas = st.sidebar.number_input(
     "Batas maksimum konsumsi gula harian (gram)",
     min_value=1,
-    value=st.session_state.batas_gula,
+    value=batas_default,
     step=1
 )
+
 st.session_state.batas_gula = batas
 
-# Form input konsumsi produk
+# ===========================
+# FORM INPUT KONSUMSI
+# ===========================
+
 with st.form("form_produk"):
     st.subheader("➕ Tambahkan Konsumsi Gula")
-    produk = st.selectbox("Pilih Produk", list(produk_gula.keys()))
+    produk = st.selectbox("Pilih Produk", sorted(produk_gula.keys()))
     jumlah = st.number_input("Jumlah Porsi", min_value=1, value=1)
     submitted = st.form_submit_button("Tambah")
 
     if submitted:
         total = produk_gula[produk] * jumlah
         st.session_state.riwayat.append((produk, jumlah, total))
-        st.success(f"{jumlah} porsi {produk} = {total} gram gula ditambahkan.")
+        st.success(f"{jumlah} porsi {produk} = {total:.1f} gram gula ditambahkan.")
 
-# Tampilkan riwayat konsumsi
+# ===========================
+# RIWAYAT KONSUMSI
+# ===========================
+
 if st.session_state.riwayat:
     st.subheader("📋 Riwayat Konsumsi Hari Ini")
     total_gula = sum(item[2] for item in st.session_state.riwayat)
 
     for i, (produk, jumlah, gula) in enumerate(st.session_state.riwayat, start=1):
-        st.write(f"{i}. {jumlah} porsi {produk} = {gula} gram gula")
+        st.write(f"{i}. {jumlah} porsi {produk} = {gula:.1f} gram gula")
 
-    # Notifikasi batas
+    # Notifikasi batas konsumsi
     if total_gula > st.session_state.batas_gula:
         st.error(f"⚠️ Total konsumsi {total_gula:.1f} gram telah melebihi batas {st.session_state.batas_gula} gram!")
     else:
-        st.info(f"💡 Total Gula Hari Ini: {total_gula:.1f} gram dari batas {st.session_state.batas_gula} gram.")
+        st.info(f"💡 Total Gula Hari Ini: {total_gula:.1f} gram dari batas {st.session_state.batas_gula} gram berdasarkan usia {usia} tahun.")
 
-# Tombol reset
+# ===========================
+# RESET DATA
+# ===========================
+
 if st.button("🔄 Reset Data"):
     st.session_state.riwayat = []
     st.warning("Riwayat konsumsi telah dihapus.")
